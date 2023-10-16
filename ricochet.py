@@ -3,16 +3,23 @@ import math
 import random
 
 class Game():
-    def __init__(self):
+    def __init__(self, connect_lines = True, trails_lines = False):
         pg.init()
         self.screen = pg.display.set_mode((1000, 1000))
         self.clock = pg.time.Clock()
 
+        self.connect_lines = connect_lines
+        self.trails_lines = trails_lines
+
         self.spr = []
         for i in range(8):
-            self.spr.append(Dot((random.randint(100, 300), random.randint(100, 300)), '1'))
+            self.spr.append(Dot((150, 250), '1'))
 
         self.create_box((-5, -5), 1005, 5)
+        self.create_box((100, 200), 100, 5)
+        self.create_box((500, 500), 200, 5)
+        self.create_box((200, 600), 100, 5)
+        self.create_box((600, 20), 50, 5)
 
     def create_box(self, topleft, size, width):
         Block(topleft, (size, width), 'BOTTOM')
@@ -32,12 +39,20 @@ class Game():
             dots.update(self.screen)
             dots.draw(self.screen)
 
-            for index, dot in enumerate(self.spr):
-                for i in self.spr:
-                    if i != dot:
-                        pg.draw.line(surface=self.screen, color=dot.c,
-                                     start_pos=[dot.rect.x, dot.rect.y],
-                                     end_pos=[i.rect.x, i.rect.y])
+            if self.connect_lines:
+                for index, dot in enumerate(self.spr):
+                    for i in self.spr:
+                        if i != dot:
+                            pg.draw.line(surface=self.screen, color=dot.c,
+                                         start_pos=[dot.rect.x, dot.rect.y],
+                                         end_pos=[i.rect.x, i.rect.y])
+            if self.trails_lines:
+                for dot in dots:
+                    for index, coords in enumerate(dot.trail):
+                        if len(dot.trail) != 1 and index != len(dot.trail) - 1:
+                            pg.draw.line(surface=self.screen, color=dot.c,
+                                         start_pos=coords,
+                                         end_pos=dot.trail[index + 1])
 
             blocks.update()
             blocks.draw(self.screen)
@@ -88,5 +103,5 @@ class Block(pg.sprite.Sprite):
 
         self.type = type
 
-game = Game()
+game = Game(True, True)
 game.run()

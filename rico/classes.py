@@ -6,7 +6,7 @@ dots = pg.sprite.Group()
 circulardots = pg.sprite.Group()
 blocks = pg.sprite.Group()
 class Dot(pg.sprite.Sprite):
-    def __init__(self, pos, static = False, letter = 'A'):
+    def __init__(self, pos, velocity, static = False, letter = 'A', ):
         super(Dot, self).__init__()
         self.add(dots)
 
@@ -19,9 +19,7 @@ class Dot(pg.sprite.Sprite):
         self.trail = [[self.rect.x, self.rect.y]]
         self.c = random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)
 
-        self.vector = pg.Vector2(
-            random.randint(5, 5), random.randint(5, 5)
-        )
+        self.vector = velocity
 
     def update(self, surface):
 
@@ -39,21 +37,25 @@ class Dot(pg.sprite.Sprite):
             self.rect.y += self.vector.y
 
 class CircularDot(pg.sprite.Sprite):
-    def __init__(self, pos, radius, inverted):
+    def __init__(self, pos, radius, inverted, letter='A'):
         super(CircularDot, self).__init__()
-        self.add(circulardots)
+        self.add(dots)
 
         self.image = pg.Surface((2, 2))
         self.image.fill((200, 200, 200))
         self.rect = self.image.get_rect(topleft = pos)
 
+        self.trail = [[self.rect.x, self.rect.y]]
         self.cpos = pos
         self.c = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
 
+        self.letter = letter
         self.index = 0
         self.radius = radius
         self.posxs = [x for x in range(self.cpos[0] - radius, self.cpos[0] + radius) if x % 3 == 0]
         self.posxs.append(self.posxs[-1] + 1)
+
+        self.timer = Timer(13, 100)
 
         if inverted:
             coordinates_p = [
@@ -75,13 +77,14 @@ class CircularDot(pg.sprite.Sprite):
         self.rect.x = self.coordinates[index][0]
         self.rect.y = self.coordinates[index][1]
 
-    def update(self):
+    def update(self, surface):
         if self.index < len(self.coordinates) - 1:
             self.index += 1
         else:
             self.radius += 1
             self.index = 0
 
+        self.timer.update(lambda: self.trail.append([self.rect.x, self.rect.y]))
         self.updatepos(self.index)
 
 class Block(pg.sprite.Sprite):

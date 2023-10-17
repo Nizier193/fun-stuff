@@ -14,21 +14,48 @@ class Game():
 
         self.spr = []
 
-        self.spr.append(Dot((350, 250),  False, 'A'))
-        self.spr.append(Dot((550, 250),  False, 'B'))
-        self.spr.append(Dot((350, 450),  False, 'C'))
-        self.spr.append(Dot((550, 450),  False, 'D'))
+        self.spr.append(CircularDot((500, 500), 50, False, 'A'))
 
-        self.spr.append(Dot((450, 350),  True, 'E'))
-        self.spr.append(Dot((650, 350),  True, 'F'))
-        self.spr.append(Dot((450, 550),  True, 'G'))
-        self.spr.append(Dot((650, 550),  True, 'H'))
-
-        self.connecting_conf = ['AB', 'AC', 'CD', 'BD', 'AE', 'BF', 'CG', 'DH', 'EG', 'GH', 'HF', 'FE']
+        self.connecting_conf = self.create_cube(pg.Vector2(20, 10), 200, False)
+        self.trailed_conf = ['A', 'B']
 
         self.create_box((-5, -5), 1005, 5)
 
-        self.timer = Timer(80, 2)
+        self.timer1 = Timer(100, 0)
+        self.timer2 = Timer(200, 0)
+
+        class Letter():
+            def __init__(self):
+                pass
+        self.letter = Letter
+
+    def create_cube(self, topleft, size, static = False):
+        self.spr.append(Dot((topleft.x, topleft.y),  pg.Vector2(
+            random.randint(4, 4), random.randint(5, 5)
+        ), static, 'A'))
+        self.spr.append(Dot((topleft.x + size, topleft.y),  pg.Vector2(
+            random.randint(4, 4), random.randint(5, 5)
+        ),  static, 'B'))
+        self.spr.append(Dot((topleft.x, topleft.y + size),  pg.Vector2(
+            random.randint(4, 4), random.randint(5, 5)
+        ),  static, 'C'))
+        self.spr.append(Dot((topleft.x + size, topleft.y + size),  pg.Vector2(
+            random.randint(4, 4), random.randint(5, 5)
+        ),  static, 'D'))
+
+        self.spr.append(Dot((topleft.x + size / 2, topleft.y + size / 2),  pg.Vector2(
+            random.randint(5, 5), random.randint(8, 8)
+        ),  static, 'E'))
+        self.spr.append(Dot((topleft.x + size + size / 2, topleft.y + size / 2),  pg.Vector2(
+            random.randint(5, 5), random.randint(8, 8)
+        ),  static, 'F'))
+        self.spr.append(Dot((topleft.x + size / 2, topleft.y + size + size / 2),  pg.Vector2(
+            random.randint(5, 5), random.randint(8, 8)
+        ),  static, 'G'))
+        self.spr.append(Dot((topleft.x + size + size / 2, topleft.y + size + size / 2),  pg.Vector2(
+            random.randint(5, 5), random.randint(8, 8)
+        ), static, 'H'))
+        return ['AB', 'AC', 'CD', 'BD', 'AE', 'BF', 'CG', 'DH', 'EG', 'GH', 'HF', 'FE']
 
     def create_box(self, topleft, size, width):
         Block(topleft, (size, width), 'BOTTOM')
@@ -52,11 +79,12 @@ class Game():
     def trail_lines(self):
         if self.trails_lines:
             for dot in dots:
-                for index, coords in enumerate(dot.trail):
-                    if len(dot.trail) != 1 and index != len(dot.trail) - 1:
-                        pg.draw.line(surface=self.screen, color=dot.c,
-                                     start_pos=coords,
-                                     end_pos=dot.trail[index + 1])
+                if dot.letter in self.trailed_conf:
+                    for index, coords in enumerate(dot.trail):
+                        if len(dot.trail) != 1 and index != len(dot.trail) - 1:
+                            pg.draw.line(surface=self.screen, color=dot.c,
+                                         start_pos=coords,
+                                         end_pos=dot.trail[index + 1])
 
     def run(self):
         while True:
@@ -78,10 +106,11 @@ class Game():
 
             self.connecting_lines()
             self.trail_lines()
+
             self.clock.tick(60)
 
 game = Game(
-    trails_lines=False,
+    trails_lines=True,
     connect_lines=True
 )
 game.run()

@@ -32,7 +32,7 @@ class Game():
 
             self.c += 1
 
-            self.clock.tick(240)
+            self.clock.tick(60)
 
 dots = pg.sprite.Group()
 class Dot(pg.sprite.Sprite):
@@ -40,7 +40,7 @@ class Dot(pg.sprite.Sprite):
         super(Dot, self).__init__()
         self.add(dots)
 
-        self.image = pg.Surface((5, 5))
+        self.image = pg.Surface((2, 2))
         self.image.fill((200, 200, 200))
         self.rect = self.image.get_rect(topleft = pos)
 
@@ -66,12 +66,6 @@ class Dot(pg.sprite.Sprite):
                 (x, abs(math.sqrt(pow(self.radius, 2) - pow(x - self.cpos[0], 2)) + self.cpos[1])) for x in list(reversed(self.posxs))
             ]
         self.coordinates = coordinates_p + coordinates_m
-    def huyna(self):
-        choice = random.choice([True, False])
-        if choice:
-            self.image.set_alpha(0)
-        else:
-            self.image.set_alpha(100)
 
     def updatepos(self, index):
         self.rect.x = self.coordinates[index][0]
@@ -83,9 +77,6 @@ class Dot(pg.sprite.Sprite):
         else:
             self.radius += 1
             self.index = 0
-
-        if self.index % 60 == 0:
-            self.huyna()
 
         self.updatepos(self.index)
 

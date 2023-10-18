@@ -1,10 +1,11 @@
 import pygame as pg
 import math
 import random
+import json
 from classes import *
 
 class Game():
-    def __init__(self, connect_lines = True, trails_lines = False):
+    def __init__(self, connect_lines = True, trails_lines = False, pre_loaded_asset = False):
         pg.init()
         self.screen = pg.display.set_mode((1000, 1000))
         self.clock = pg.time.Clock()
@@ -13,8 +14,9 @@ class Game():
         self.trails_lines = trails_lines
 
         self.spr = []
+        self.asset = json.load(open('config.json')) if pre_loaded_asset else None
 
-        self.connecting_conf = self.create_cube(pg.Vector2(160, 80), 1)
+        self.connecting_conf = self.create_cube(pg.Vector2(160, 80))
         self.trailed_conf = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
 
         self.create_box((50, 50), 500, 20)
@@ -27,35 +29,22 @@ class Game():
                 pass
         self.letter = Letter
 
-    def create_cube(self, topleft, size, static = False, rnd = [3, 5]):
+    def create_dot(self, topleft, static, letter, vector):
         self.spr.append(Dot((topleft.x, topleft.y),  pg.Vector2(
-            random.randint(rnd[0], rnd[1]), random.randint(rnd[0], rnd[1])
-        ), static, 'A'))
-        self.spr.append(Dot((topleft.x + size, topleft.y),  pg.Vector2(
-            random.randint(rnd[0], rnd[1]), random.randint(rnd[0], rnd[1])
-        ),  static, 'B'))
-        self.spr.append(Dot((topleft.x, topleft.y + size),  pg.Vector2(
-            random.randint(rnd[0], rnd[1]), random.randint(rnd[0], rnd[1])
-        ),  static, 'C'))
-        self.spr.append(Dot((topleft.x + size, topleft.y + size),  pg.Vector2(
-            random.randint(rnd[0], rnd[1]), random.randint(rnd[0], rnd[1])
-        ),  static, 'D'))
+            vector[0], vector[1]
+        ), static, letter))
 
-        self.spr.append(Dot((topleft.x + size / 2, topleft.y + size / 2),  pg.Vector2(
-            random.randint(rnd[0], rnd[1]), random.randint(rnd[0], rnd[1])
-        ),  static, 'E'))
-        self.spr.append(Dot((topleft.x + size + size / 2, topleft.y + size / 2),  pg.Vector2(
-            random.randint(rnd[0], rnd[1]), random.randint(rnd[0], rnd[1])
-        ),  static, 'F'))
-        self.spr.append(Dot((topleft.x + size / 2, topleft.y + size + size / 2),  pg.Vector2(
-            random.randint(rnd[0], rnd[1]), random.randint(rnd[0], rnd[1])
-        ),  static, 'G'))
-        self.spr.append(Dot((topleft.x + size + size / 2, topleft.y + size + size / 2),  pg.Vector2(
-            random.randint(rnd[0], rnd[1]), (random.randint(rnd[0], rnd[1]))
-        ), static, 'H'))
-
+    def create_cube(self, topleft, static = False, rnd = [3, 5]):
         ltrs = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
+
+        for ltr, asset in zip(ltrs, self.asset if self.asset != None else rnd):
+            self.create_dot(topleft, static, ltr, asset)
+
+        lst = [[body.vector.x, body.vector.y] for body in self.spr]
+        file = open('config.json', 'w', encoding='UTF-8').write(str(lst))
+
         connections = ['AB', 'AC', 'CD', 'BD', 'AE', 'BF', 'CG', 'DH', 'EG', 'GH', 'HF', 'FE']
+
         return [f'{ltr1}{ltr2}' for ltr1 in ltrs for ltr2 in ltrs]
 
     def create_box(self, topleft, size, width):
@@ -112,6 +101,7 @@ class Game():
 
 game = Game(
     trails_lines=False,
-    connect_lines=True
+    connect_lines=True,
+    pre_loaded_asset=True
 )
 game.run()

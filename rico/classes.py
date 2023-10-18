@@ -10,7 +10,7 @@ class Dot(pg.sprite.Sprite):
         super(Dot, self).__init__()
         self.add(dots)
 
-        self.image = pg.Surface((5, 5))
+        self.image = pg.Surface((1, 1))
         self.image.fill((200, 200, 200))
         self.rect = self.image.get_rect(topleft = pos)
 
@@ -19,7 +19,7 @@ class Dot(pg.sprite.Sprite):
         self.trail = [[self.rect.x, self.rect.y]]
         self.c = random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)
 
-        self.vector = velocity
+        self.vector = pg.Vector2(velocity[0], velocity[1])
 
     def update(self, surface):
 

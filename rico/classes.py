@@ -6,7 +6,19 @@ dots = pg.sprite.Group()
 circulardots = pg.sprite.Group()
 blocks = pg.sprite.Group()
 class Dot(pg.sprite.Sprite):
-    def __init__(self, pos, velocity, static = False, letter = 'A', ):
+    '''
+    Класс, объекты которого являются точки со способностью к отскакиванию от стен классов Block или от границ
+    окна, если флаг borders == True.
+    '''
+    def __init__(self, pos, velocity, static = False, letter = 'A'):
+        '''
+        :param pos: Положение точки на координатной плоскости.
+        :param velocity: Начальная скорость точки.
+        :param static: Статична ли точка.
+        :param letter: Условное обозначение точки. Используется при отслеживании траектории или соединения точек между собой.
+
+        trail - атрибут для отслеживания траектории.
+        '''
         super(Dot, self).__init__()
         self.add(dots)
 
@@ -14,6 +26,7 @@ class Dot(pg.sprite.Sprite):
         self.image.fill((200, 200, 200))
         self.rect = self.image.get_rect(topleft = pos)
 
+        self.brds = False
         self.letter = letter
         self.static = static
         self.trail = [[self.rect.x, self.rect.y]]
@@ -21,7 +34,30 @@ class Dot(pg.sprite.Sprite):
 
         self.vector = pg.Vector2(velocity[0], velocity[1])
 
+    def borders(self):
+        if self.brds:
+            scr = pg.display.get_window_size()
+            if self.rect.x > scr[0]:
+                self.trail.append([self.rect.x, self.rect.y])
+                self.vector.x = -self.vector.x
+            if self.rect.x < 0:
+                self.trail.append([self.rect.x, self.rect.y])
+                self.vector.x = -self.vector.x
+
+            if self.rect.y > scr[1]:
+                self.trail.append([self.rect.x, self.rect.y])
+                self.vector.y = -self.vector.y
+            if self.rect.y < 0:
+                self.trail.append([self.rect.x, self.rect.y])
+                self.vector.y = -self.vector.y
+
     def update(self, surface):
+        if not self.static:
+            self.rect.x += self.vector.x
+            self.rect.y += self.vector.y
+
+        self.borders()
+
 
         for block in pg.sprite.spritecollide(self, blocks, False):
             if block.type == 'BOTTOM':
@@ -32,11 +68,16 @@ class Dot(pg.sprite.Sprite):
                 self.trail.append([self.rect.x, self.rect.y])
                 self.vector.x *= -1
 
-        if not self.static:
-            self.rect.x += self.vector.x
-            self.rect.y += self.vector.y
+
 
 class CircularDot(pg.sprite.Sprite):
+    '''
+    Класс, объекты которого являются точками, вращающимися вокруг центра радиусом radius.
+    Вращение задано уравнением окружности r^2 = x^2 + y^2
+
+    Траектория задаётся путем включения точки каждые n секунд. n задаётся через объект
+    класса Timer.
+    '''
     def __init__(self, pos, radius, inverted, letter='A'):
         super(CircularDot, self).__init__()
         self.add(dots)
@@ -99,6 +140,9 @@ class Block(pg.sprite.Sprite):
         self.type = type
 
 class Timer():
+    '''
+    Объект этого класса исполняет какое либо действие каждые delay тиков times раз.
+    '''
     def __init__(self, delay, times):
         self.delay = delay
         self.tick = 0

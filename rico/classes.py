@@ -10,7 +10,7 @@ class Dot(pg.sprite.Sprite):
     Класс, объекты которого являются точки со способностью к отскакиванию от стен классов Block или от границ
     окна, если флаг borders == True.
     '''
-    def __init__(self, pos, velocity, static = False, letter = 'A'):
+    def __init__(self, pos, velocity, letter = 'A'):
         '''
         :param pos: Положение точки на координатной плоскости.
         :param velocity: Начальная скорость точки.
@@ -28,7 +28,6 @@ class Dot(pg.sprite.Sprite):
 
         self.brds = False
         self.letter = letter
-        self.static = static
         self.trail = [[self.rect.x, self.rect.y]]
         self.c = random.randint(0, 255), random.randint(0, 255), random.randint(0, 255)
 
@@ -52,9 +51,8 @@ class Dot(pg.sprite.Sprite):
                 self.vector.y = -self.vector.y
 
     def update(self, surface):
-        if not self.static:
-            self.rect.x += self.vector.x
-            self.rect.y += self.vector.y
+        self.rect.x += self.vector.x
+        self.rect.y += self.vector.y
 
         self.borders()
 

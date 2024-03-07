@@ -1,8 +1,15 @@
 import json
 from classes import *
 
+
 class Game():
-    def __init__(self, size, connect_lines = False, trails_lines = False, pre_loaded_asset = False, borders = False, fps = 60):
+    def __init__(self,
+                 size,
+                 connect_lines=False,
+                 trails_lines=False,
+                 pre_loaded_asset=False,
+                 borders=False,
+                 fps=60):
         '''
         :param connect_lines: Соединены ли отображаемые точки между собой.
         :param trails_lines: Оставляют ли следы отображаемые точки при столкновении с блоком.
@@ -29,17 +36,23 @@ class Game():
         self.connecting_conf = None
         self.trailed_conf = None
 
+    def create_dot(self, topleft, vector = None, letter = None):
+        topleft = pg.Vector2(topleft[0], topleft[1])
 
-    def create_dot(self, topleft, static, letter, vector):
-        dot = Dot((topleft.x, topleft.y),  pg.Vector2(
+        dot = Dot((topleft.x, topleft.y), pg.Vector2(
             vector[0], vector[1]
-        ), static, letter)
+        ), letter)
         dot.brds = self.borders
 
         self.spr.append(dot)
         return dot
 
-    def create_cube(self, topleft, static = False, rnd = [3, 5]):
+    def create_line(self, pos_start, pos_end, col = (70, 50, 50)):
+        pg.draw.line(self.screen, col, pos_start, pos_end)
+
+    def create_cube(self, topleft, static=False, rnd=[3, 5]):
+        topleft = pg.Vector2(topleft[0], topleft[1])
+
         '''
         :param topleft: Положение левого верхнего угла A на плоскости
         :param static: Является ли статичным куб
@@ -53,7 +66,8 @@ class Game():
                 self.create_dot(topleft, static, ltr, asset)
         else:
             for ltr in ltrs:
-                self.create_dot(topleft, static, ltr, pg.Vector2(random.randint(rnd[0], rnd[1]), random.randint(rnd[0], rnd[1])))
+                self.create_dot(topleft, static, ltr,
+                                pg.Vector2(random.randint(rnd[0], rnd[1]), random.randint(rnd[0], rnd[1])))
 
         connections = ['AB', 'AC', 'CD', 'BD', 'AE', 'BF', 'CG', 'DH', 'EG', 'GH', 'HF', 'FE']
 
@@ -64,13 +78,17 @@ class Game():
 
         return self.vectors, self.connecting_conf
 
-    def create_box(self, topleft, size, width):
+    def __create_box(self, topleft, size, width):
+        topleft = pg.Vector2(topleft[0], topleft[1])
+
         Block(topleft, (size, width), 'BOTTOM')
         Block(topleft, (width, size), 'SIDES')
         Block((topleft[0], topleft[1] + size), (size, width), 'BOTTOM')
         Block((topleft[0] + size, topleft[1]), (width, size + width), 'SIDES')
 
-    def connecting_lines(self):
+    def __connecting_lines(self):
+        ' O(N^2) :( '
+
         if self.connect_lines:
             for connected in self.connecting_conf:
                 a = connected[0]
@@ -84,7 +102,7 @@ class Game():
                                          start_pos=[dot.rect.x, dot.rect.y],
                                          end_pos=[i.rect.x, i.rect.y])
 
-    def trail_lines(self):
+    def __trail_lines(self):
         if self.trails_lines:
             for dot in dots:
                 if dot.letter in self.trailed_conf:
@@ -93,6 +111,8 @@ class Game():
                             pg.draw.line(surface=self.screen, color=dot.c,
                                          start_pos=coords,
                                          end_pos=dot.trail[index + 1])
+    def custom(self):
+        pass
 
     def run(self, *args):
         while True:
@@ -103,6 +123,8 @@ class Game():
             pg.display.update()
             self.screen.fill((0, 0, 0))
 
+            self.custom()
+
             dots.update(self.screen)
             dots.draw(self.screen)
 
@@ -112,14 +134,37 @@ class Game():
             blocks.update()
             blocks.draw(self.screen)
 
-            self.connecting_lines()
+            self.__connecting_lines()
             try:
-                self.trail_lines()
+                self.__trail_lines()
             except Exception:
                 raise Exception('Не указан параметр соединения точек -> game.trail_conf; для примера: ["A", "B", "C"]')
 
             for arg in args:
-                try: arg()
-                except Exception: pass
+                try:
+                    arg()
+                except Exception:
+                    pass
 
             self.clock.tick(self.fps)
+
+class Ray_Tracer():
+    def __init__(self, width, height):
+        self.width, self.height = width, height
+
+    #                      x_pos       y_pos        x_dest                      y_dest
+    # game.create_line((topleft[0], topleft[1]), (topleft[0] + 1000 * sign, topleft[1] + (sign * cf * 1000)))
+    def calc(self, coef, x_pos, y_pos, sign, rev=False):
+
+        sw = sign[0] * -1 if rev else sign[0]
+        sh = sign[1] * -1 if rev else sign[1]
+
+        w = self.width if sw == -1 else 0
+        h = self.height if sh == -1 else 0
+
+        y_dest = coef * (w - x_pos) + y_pos
+        if y_dest < self.height and y_dest > 0:
+            return w, coef * (w - x_pos) + y_pos, (sw, sh)
+        else:
+            # ОШИБКА КРОЕТСЯ В ИНВЕРСИИ ЗНАКОВ!
+            return ((h - y_pos) / coef) + x_pos, h, (-sw, -sh)

@@ -16,7 +16,7 @@ def grid(px, width, height, game, col = (30, 30, 30), showaxis = True):
             game.create_line((0, coordinates[1]), (width, coordinates[1]), (50, 50, 50))
             game.create_line((coordinates[0], 0), (coordinates[0], height), (50, 50, 50))
 
-def ray_trace(mouse_pos, topleft, n_bounce, ray_tracer, game):
+def ray_trace(mouse_pos, topleft, ray_tracer, game, col = (50, 50, 50), n_bounce = 0):
     '''
 
     Строит траекторию полета снаряда.
@@ -41,14 +41,14 @@ def ray_trace(mouse_pos, topleft, n_bounce, ray_tracer, game):
     sign_y = -1 if diff_y < 0 else 1
 
     p = ray_tracer.calc(cf, topleft[0], topleft[1], sign=(sign_x, sign_y))
-    game.create_line(topleft, (p[0], p[1]), (255, 100, 200))
+    game.create_line(topleft, (p[0], p[1]), col)
 
     c = -1
     for i in range(n_bounce):
         p2 = ray_tracer.calc(cf * c, p[0], p[1], sign=(-p[2][0], p[2][1]))
-        game.create_line((p[0], p[1]), (p2[0], p2[1]), (255, 100, 200))
+        game.create_line((p[0], p[1]), (p2[0], p2[1]), col)
 
         c *= -1
         p = p2
 
-    return p
+    return p, cf, topleft

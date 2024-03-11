@@ -22,7 +22,7 @@ class Dot(pg.sprite.Sprite):
         super(Dot, self).__init__()
         self.add(dots)
 
-        self.image = pg.Surface((1, 1))
+        self.image = pg.Surface((5, 5))
         self.image.fill((200, 200, 200))
         self.rect = self.image.get_rect(topleft = pos)
 
@@ -50,6 +50,15 @@ class Dot(pg.sprite.Sprite):
                 self.trail.append([self.rect.x, self.rect.y])
                 self.vector.y = -self.vector.y
 
+    def upd_vector(self, new_vector):
+        '''
+        Allowes you to change dot`s vector with just a simple tuple.
+        :param new_vector: tuple
+        :return: nothing
+        '''
+
+        self.vector = pg.Vector2(new_vector[0], new_vector[1])
+
     def update(self, surface):
         self.rect.x += self.vector.x
         self.rect.y += self.vector.y
@@ -76,11 +85,11 @@ class CircularDot(pg.sprite.Sprite):
     Траектория задаётся путем включения точки каждые n секунд. n задаётся через объект
     класса Timer.
     '''
-    def __init__(self, pos, radius, inverted, letter='A'):
+    def __init__(self, pos, radius, inverted=False, letter='A'):
         super(CircularDot, self).__init__()
         self.add(dots)
 
-        self.image = pg.Surface((2, 2))
+        self.image = pg.Surface((0, 0))
         self.image.fill((200, 200, 200))
         self.rect = self.image.get_rect(topleft = pos)
 
@@ -91,8 +100,12 @@ class CircularDot(pg.sprite.Sprite):
         self.letter = letter
         self.index = 0
         self.radius = radius
-        self.posxs = [x for x in range(self.cpos[0] - radius, self.cpos[0] + radius) if x % 3 == 0]
+        self.posxs = [x for x in range(self.cpos[0] - radius, self.cpos[0] + radius)]
         self.posxs.append(self.posxs[-1] + 1)
+
+        #--
+        self.body = None
+        #--
 
         self.timer = Timer(13, 100)
 
@@ -113,8 +126,16 @@ class CircularDot(pg.sprite.Sprite):
         self.coordinates = coordinates_p + coordinates_m
 
     def updatepos(self, index):
-        self.rect.x = self.coordinates[index][0]
-        self.rect.y = self.coordinates[index][1]
+        x = self.coordinates[index][0]
+        y = self.coordinates[index][1]
+
+        self.rect.x, self.rect.y = self.updatepos_corr((x, y), self.body)
+
+    def updatepos_corr(self, curr_pos, body):
+        x = body.rect.centerx if body else 0
+        y = body.rect.centery if body else 0
+
+        return (curr_pos[0], curr_pos[1])
 
     def update(self, surface):
         if self.index < len(self.coordinates) - 1:
@@ -150,10 +171,13 @@ class Timer():
 
     def certain_times(self, func):
         if self.times <= self.times_expected:
-            func()
             self.times += 1
+
+            return func()
 
     def update(self, func):
         self.tick += 1
+
         if self.tick % self.delay == 0:
-            self.certain_times(func)
+            return self.certain_times(func)
+

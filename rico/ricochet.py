@@ -9,7 +9,8 @@ class Game():
                  trails_lines=False,
                  pre_loaded_asset=False,
                  borders=False,
-                 fps=60):
+                 fps=60,
+                 game_color = (200, 200, 200)):
         '''
         :param connect_lines: Соединены ли отображаемые точки между собой.
         :param trails_lines: Оставляют ли следы отображаемые точки при столкновении с блоком.
@@ -22,6 +23,7 @@ class Game():
         Базовый класс определяющий поведение игры.
         '''
         self.fps = fps
+        self.game_color = game_color
         self.borders = borders
 
         pg.init()
@@ -121,7 +123,7 @@ class Game():
                     pg.quit()
 
             pg.display.update()
-            self.screen.fill((0, 0, 0))
+            self.screen.fill(self.game_color)
 
             self.custom()
 

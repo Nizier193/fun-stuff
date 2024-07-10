@@ -40,11 +40,11 @@ def show_m():
     # epos4 = ray_trace(ed4.rect.topleft, mouse_pos, 0, ray_tracer, game)
     # epos5 = ray_trace(ed5.rect.topleft, mouse_pos, 0, ray_tracer, game)
 
-    epos1 = ray_trace(ed1.rect.topleft, mouse_pos, 0, ray_tracer, game)
-    epos2 = ray_trace(ed2.rect.topleft, mouse_pos, 0, ray_tracer, game)
-    epos3 = ray_trace(ed3.rect.topleft, mouse_pos, 0, ray_tracer, game)
-    epos4 = ray_trace(ed4.rect.topleft, mouse_pos, 0, ray_tracer, game)
-    epos5 = ray_trace(ed5.rect.topleft, mouse_pos, 0, ray_tracer, game)
+    epos1 = ray_trace(ed1.rect.topleft, mouse_pos, ray_tracer, game)
+    epos2 = ray_trace(ed2.rect.topleft, mouse_pos, ray_tracer, game)
+    epos3 = ray_trace(ed3.rect.topleft, mouse_pos, ray_tracer, game)
+    epos4 = ray_trace(ed4.rect.topleft, mouse_pos, ray_tracer, game)
+    epos5 = ray_trace(ed5.rect.topleft, mouse_pos, ray_tracer, game)
 
     pairs = [[epos1, epos2], [epos2, epos3], [epos3, epos5], [epos5, epos4], [epos4, epos1]]
 
